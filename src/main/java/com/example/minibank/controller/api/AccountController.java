@@ -45,18 +45,18 @@ public class AccountController {
         return new ResponseEntity<>(transfers, HttpStatus.OK);
     }
 
+    @PostMapping(path = "{code}/transfers")
+    public ResponseEntity<Void> transferAmount(@PathVariable("code") String code, @RequestBody TransferRequest transferRequest) {
+        accountService.transfer(code, transferRequest);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping(path = "{code}/deposit")
     public ResponseEntity<Account> depositAmount(@PathVariable("code") String code, @RequestBody DepositRequest depositRequest) {
         Account account = accountService.deposit(code, depositRequest);
 
         return new ResponseEntity<>(account, HttpStatus.OK);
-    }
-
-    @PostMapping(path = "{code}/transfer")
-    public ResponseEntity<Void> transferAmount(@PathVariable("code") String code, @RequestBody TransferRequest transferRequest) {
-        accountService.transfer(code, transferRequest);
-
-        return ResponseEntity.noContent().build();
     }
 
 }
