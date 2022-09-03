@@ -1,4 +1,4 @@
-package com.example.minibank.transaction;
+package com.example.minibank.transfer;
 
 import com.example.minibank.account.Account;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -10,8 +10,8 @@ import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transactions")
-public class Transaction {
+@Table(name = "transfers")
+public class Transfer {
 
     @JsonIgnore
     @Id

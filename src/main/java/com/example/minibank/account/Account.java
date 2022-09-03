@@ -1,7 +1,7 @@
 package com.example.minibank.account;
 
 import com.example.minibank.customer.Customer;
-import com.example.minibank.transaction.Transaction;
+import com.example.minibank.transfer.Transfer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.CreationTimestamp;
@@ -41,11 +41,11 @@ public class Account {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "senderAccount")
-    private List<Transaction> sentTransactions;
+    private List<Transfer> sentTransfers;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "receiverAccount")
-    private List<Transaction> receivedTransactions;
+    private List<Transfer> receivedTransfers;
 
     public Integer getId() {
         return id;
@@ -71,12 +71,20 @@ public class Account {
         this.balance = balance;
     }
 
-    public List<Transaction> getSentTransactions() {
-        return sentTransactions;
+    public List<Transfer> getSentTransfers() {
+        return sentTransfers;
     }
 
-    public void setSentTransactions(List<Transaction> sentTransactions) {
-        this.sentTransactions = sentTransactions;
+    public void setSentTransfers(List<Transfer> sentTransfers) {
+        this.sentTransfers = sentTransfers;
+    }
+
+    public List<Transfer> getReceivedTransfers() {
+        return receivedTransfers;
+    }
+
+    public void setReceivedTransfers(List<Transfer> receivedTransfers) {
+        this.receivedTransfers = receivedTransfers;
     }
 
     public LocalDateTime getUpdatedAt() {
@@ -101,13 +109,5 @@ public class Account {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
-    }
-
-    public List<Transaction> getReceivedTransactions() {
-        return receivedTransactions;
-    }
-
-    public void setReceivedTransactions(List<Transaction> receivedTransactions) {
-        this.receivedTransactions = receivedTransactions;
     }
 }
