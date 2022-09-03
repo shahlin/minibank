@@ -15,6 +15,7 @@ import java.time.Period;
 @Table(name = "customers")
 public class Customer {
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
@@ -47,10 +48,9 @@ public class Customer {
     @Transient
     private Integer age;
 
-    @OneToOne(mappedBy = "account")
+    @OneToOne(mappedBy = "customer")
     private Account account;
 
-    @JsonIgnore
     public Integer getId() {
         return id;
     }
