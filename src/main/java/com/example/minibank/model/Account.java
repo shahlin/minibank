@@ -1,7 +1,5 @@
-package com.example.minibank.account;
+package com.example.minibank.model;
 
-import com.example.minibank.customer.Customer;
-import com.example.minibank.transfer.Transfer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.CreationTimestamp;

@@ -1,10 +1,11 @@
-package com.example.minibank.customer;
+package com.example.minibank.service;
 
-import com.example.minibank.account.Account;
-import com.example.minibank.account.AccountService;
-import com.example.minibank.exceptions.CustomerEmailTakenException;
-import com.example.minibank.exceptions.CustomerIneligibleException;
-import com.example.minibank.exceptions.CustomerNotFoundException;
+import com.example.minibank.model.Account;
+import com.example.minibank.model.Customer;
+import com.example.minibank.repository.CustomerRepository;
+import com.example.minibank.exception.CustomerEmailTakenException;
+import com.example.minibank.exception.CustomerIneligibleException;
+import com.example.minibank.exception.CustomerNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

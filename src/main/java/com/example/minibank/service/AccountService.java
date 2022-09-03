@@ -1,10 +1,11 @@
-package com.example.minibank.account;
+package com.example.minibank.service;
 
-import com.example.minibank.customer.Customer;
-import com.example.minibank.exceptions.AccountExistsException;
-import com.example.minibank.exceptions.AccountNotFoundException;
-import com.example.minibank.exceptions.CustomerNotFoundException;
-import com.example.minibank.transfer.Transfer;
+import com.example.minibank.model.Customer;
+import com.example.minibank.exception.AccountExistsException;
+import com.example.minibank.exception.AccountNotFoundException;
+import com.example.minibank.model.Account;
+import com.example.minibank.repository.AccountRepository;
+import com.example.minibank.model.Transfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

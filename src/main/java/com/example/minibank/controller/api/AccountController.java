@@ -1,6 +1,8 @@
-package com.example.minibank.account;
+package com.example.minibank.controller.api;
 
-import com.example.minibank.transfer.Transfer;
+import com.example.minibank.service.AccountService;
+import com.example.minibank.model.Account;
+import com.example.minibank.model.Transfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

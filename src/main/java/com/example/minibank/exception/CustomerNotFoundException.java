@@ -1,4 +1,4 @@
-package com.example.minibank.exceptions;
+package com.example.minibank.exception;
 
 public class CustomerNotFoundException extends RuntimeException {
     public CustomerNotFoundException() {
