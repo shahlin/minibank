@@ -3,7 +3,6 @@ package com.example.minibank.service;
 import com.example.minibank.model.Account;
 import com.example.minibank.model.Customer;
 import com.example.minibank.repository.CustomerRepository;
-import com.example.minibank.exception.CustomerEmailTakenException;
 import com.example.minibank.exception.CustomerIneligibleException;
 import com.example.minibank.exception.CustomerNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +89,7 @@ public class CustomerService {
         );
 
         if (customerOptional.isPresent()) {
-            throw new CustomerEmailTakenException();
+            throw new RuntimeException("Customer email is already taken");
         }
     }
 
