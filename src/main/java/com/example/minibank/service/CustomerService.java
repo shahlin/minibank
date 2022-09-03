@@ -3,8 +3,8 @@ package com.example.minibank.service;
 import com.example.minibank.model.Account;
 import com.example.minibank.model.Customer;
 import com.example.minibank.repository.CustomerRepository;
-import com.example.minibank.exception.CustomerIneligibleException;
 import com.example.minibank.exception.CustomerNotFoundException;
+import com.example.minibank.validator.CustomerValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final AccountService accountService;
 
-    private static final int CUSTOMER_MIN_AGE_REQUIRED = 18;
+    public static final int CUSTOMER_MIN_AGE_REQUIRED = 18;
 
     @Autowired
     public CustomerService(CustomerRepository customerRepository, AccountService accountService) {
@@ -39,8 +39,8 @@ public class CustomerService {
 
     @Transactional
     public Customer createCustomer(Customer customer) {
-        validateCustomerExistsWithEmail(customer, "");
-        validateAge(customer);
+        checkCustomerExistsWithEmail(customer, "");
+        CustomerValidator.validateAge(customer);
 
         customer.setCode(generateCustomerCode());
 
@@ -57,8 +57,8 @@ public class CustomerService {
 
         Customer existingCustomer = customerOptional.get();
 
-        validateCustomerExistsWithEmail(customer, existingCustomer.getEmail());
-        validateAge(customer);
+        CustomerValidator.validateAge(customer);
+        checkCustomerExistsWithEmail(customer, existingCustomer.getEmail());
 
         existingCustomer.setName(customer.getName());
         existingCustomer.setEmail(customer.getEmail());
@@ -77,12 +77,7 @@ public class CustomerService {
         return accountService.openNewAccountForCustomer(customerOptional.get());
     }
 
-    private String generateCustomerCode() {
-        UUID uuid = UUID.randomUUID();
-        return uuid.toString();
-    }
-
-    private void validateCustomerExistsWithEmail(Customer customer, String excludeEmail) {
+    private void checkCustomerExistsWithEmail(Customer customer, String excludeEmail) {
         Optional<Customer> customerOptional = customerRepository.findCustomerByEmailWithExcludeList(
                 customer.getEmail(),
                 List.of(excludeEmail)
@@ -93,9 +88,8 @@ public class CustomerService {
         }
     }
 
-    private void validateAge(Customer customer) {
-        if (customer.getAge() < CUSTOMER_MIN_AGE_REQUIRED) {
-            throw new CustomerIneligibleException("Customer age must be above " + CUSTOMER_MIN_AGE_REQUIRED);
-        }
+    private String generateCustomerCode() {
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString();
     }
 }

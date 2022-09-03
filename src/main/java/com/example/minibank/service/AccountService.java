@@ -2,13 +2,13 @@ package com.example.minibank.service;
 
 import com.example.minibank.controller.request.DepositRequest;
 import com.example.minibank.controller.request.TransferRequest;
-import com.example.minibank.exception.AccountTransactionException;
 import com.example.minibank.model.Customer;
 import com.example.minibank.exception.AccountExistsException;
 import com.example.minibank.exception.AccountNotFoundException;
 import com.example.minibank.model.Account;
 import com.example.minibank.repository.AccountRepository;
 import com.example.minibank.model.Transfer;
+import com.example.minibank.validator.AccountTransactionValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +18,9 @@ import java.util.*;
 @Service
 public class AccountService {
 
-    private final int MINIMUM_DEPOSIT_AMOUNT = 1;
-    private final int MAXIMUM_DEPOSIT_AMOUNT = 100_000;
-    private final int MINIMUM_TRANSFER_AMOUNT = 1;
+    public static final int MINIMUM_DEPOSIT_AMOUNT = 1;
+    public static final int MAXIMUM_DEPOSIT_AMOUNT = 100_000;
+    public static final int MINIMUM_TRANSFER_AMOUNT = 1;
 
     private final AccountRepository accountRepository;
 
@@ -76,7 +76,7 @@ public class AccountService {
             throw new AccountNotFoundException();
         }
 
-        validateDepositAmount(depositRequest);
+        AccountTransactionValidator.validateDepositAmount(depositRequest);
 
         account.get().deposit(depositRequest.getAmount());
 
@@ -97,30 +97,10 @@ public class AccountService {
             throw new AccountNotFoundException("Receiver account not found");
         }
 
-        validateTransferAmount(senderAccount.get(), transferRequest.getAmount());
+        AccountTransactionValidator.validateTransferAmount(senderAccount.get(), transferRequest.getAmount());
 
         senderAccount.get().withdraw(transferRequest.getAmount());
         receiverAccount.get().deposit(transferRequest.getAmount());
-    }
-
-    private void validateDepositAmount(DepositRequest depositRequest) {
-        if (depositRequest.getAmount() < MINIMUM_DEPOSIT_AMOUNT) {
-            throw new AccountTransactionException("Deposit amount cannot be less than 1");
-        }
-
-        if (depositRequest.getAmount() > MAXIMUM_DEPOSIT_AMOUNT) {
-            throw new AccountTransactionException("Deposit amount cannot be less than 1");
-        }
-    }
-
-    private void validateTransferAmount(Account account, double amount) {
-        if (amount > account.getBalance()) {
-            throw new AccountTransactionException("Insufficient funds to make the transfer");
-        }
-
-        if (amount < MINIMUM_TRANSFER_AMOUNT) {
-            throw new AccountTransactionException("Transfer amount cannot be less than 1");
-        }
     }
 
     private String generateAccountCode() {
