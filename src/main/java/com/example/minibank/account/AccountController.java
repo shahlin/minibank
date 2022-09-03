@@ -1,5 +1,6 @@
 package com.example.minibank.account;
 
+import com.example.minibank.transfer.Transfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "api/v1/accounts")
@@ -33,6 +35,13 @@ public class AccountController {
         Account account = accountService.getAccount(code);
 
         return new ResponseEntity<>(account, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "{code}/transfers")
+    public ResponseEntity<Map<String, List<Transfer>>> getAllTransfers(@PathVariable("code") String code) {
+        Map<String, List<Transfer>> transfers = accountService.getAllTransfers(code);
+
+        return new ResponseEntity<>(transfers, HttpStatus.OK);
     }
 
 }

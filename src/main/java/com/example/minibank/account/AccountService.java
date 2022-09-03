@@ -4,13 +4,12 @@ import com.example.minibank.customer.Customer;
 import com.example.minibank.exceptions.AccountExistsException;
 import com.example.minibank.exceptions.AccountNotFoundException;
 import com.example.minibank.exceptions.CustomerNotFoundException;
+import com.example.minibank.transfer.Transfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class AccountService {
@@ -45,6 +44,20 @@ public class AccountService {
         account.setBalance(0);
 
         return accountRepository.save(account);
+    }
+
+    public Map<String, List<Transfer>> getAllTransfers(String code) {
+        Optional<Account> account = accountRepository.findAccountByCode(code);
+
+        if (account.isEmpty()) {
+            throw new AccountNotFoundException();
+        }
+
+        Map<String, List<Transfer>> transfers = new HashMap<>();
+        transfers.put("sent", account.get().getSentTransfers());
+        transfers.put("received", account.get().getReceivedTransfers());
+
+        return transfers;
     }
 
     private String generateAccountCode() {
