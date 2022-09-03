@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,23 +35,53 @@ public class CustomerService {
 
     @Transactional
     public Customer createCustomer(Customer customer) {
-        Optional<Customer> customerOptional = customerRepository.findCustomerByEmail(customer.getEmail());
-
-        if (customerOptional.isPresent()) {
-            throw new CustomerEmailTakenException();
-        }
-
-        if (customer.getAge() < CUSTOMER_MIN_AGE_REQUIRED) {
-            throw new CustomerIneligibleException("Customer age must be above " + CUSTOMER_MIN_AGE_REQUIRED);
-        }
+        validateCustomerExistsWithEmail(customer, "");
+        validateAge(customer);
 
         customer.setCode(generateCustomerCode());
 
         return customerRepository.save(customer);
     }
 
+    @Transactional
+    public Customer updateCustomer(String code, Customer customer) {
+        Optional<Customer> customerOptional = customerRepository.findCustomerByCode(code);
+
+        if (customerOptional.isEmpty()) {
+            throw new CustomerNotFoundException();
+        }
+
+        Customer existingCustomer = customerOptional.get();
+
+        validateCustomerExistsWithEmail(customer, existingCustomer.getEmail());
+        validateAge(customer);
+
+        existingCustomer.setName(customer.getName());
+        existingCustomer.setEmail(customer.getEmail());
+        existingCustomer.setUpdatedAt(LocalDateTime.now());
+
+        return existingCustomer;
+    }
+
     private String generateCustomerCode() {
         UUID uuid = UUID.randomUUID();
         return uuid.toString();
+    }
+
+    private void validateCustomerExistsWithEmail(Customer customer, String excludeEmail) {
+        Optional<Customer> customerOptional = customerRepository.findCustomerByEmailWithExcludeList(
+                customer.getEmail(),
+                List.of(excludeEmail)
+        );
+
+        if (customerOptional.isPresent()) {
+            throw new CustomerEmailTakenException();
+        }
+    }
+
+    private void validateAge(Customer customer) {
+        if (customer.getAge() < CUSTOMER_MIN_AGE_REQUIRED) {
+            throw new CustomerIneligibleException("Customer age must be above " + CUSTOMER_MIN_AGE_REQUIRED);
+        }
     }
 }
