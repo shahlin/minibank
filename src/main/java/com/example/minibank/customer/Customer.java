@@ -1,5 +1,6 @@
 package com.example.minibank.customer;
 
+import com.example.minibank.account.Account;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -45,6 +46,9 @@ public class Customer {
 
     @Transient
     private Integer age;
+
+    @OneToOne(mappedBy = "account")
+    private Account account;
 
     @JsonIgnore
     public Integer getId() {
