@@ -39,8 +39,8 @@ public class CustomerService {
 
     @Transactional
     public Customer createCustomer(Customer customer) {
-        checkCustomerExistsWithEmail(customer, "");
         CustomerValidator.validateAge(customer);
+        checkCustomerExistsWithEmail(customer, "");
 
         customer.setCode(generateCustomerCode());
 
