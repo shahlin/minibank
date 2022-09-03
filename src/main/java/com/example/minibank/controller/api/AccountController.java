@@ -1,6 +1,7 @@
 package com.example.minibank.controller.api;
 
 import com.example.minibank.controller.request.DepositRequest;
+import com.example.minibank.controller.request.TransferRequest;
 import com.example.minibank.service.AccountService;
 import com.example.minibank.model.Account;
 import com.example.minibank.model.Transfer;
@@ -49,6 +50,13 @@ public class AccountController {
         Account account = accountService.deposit(code, depositRequest);
 
         return new ResponseEntity<>(account, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "{code}/transfer")
+    public ResponseEntity<Void> transferAmount(@PathVariable("code") String code, @RequestBody TransferRequest transferRequest) {
+        accountService.transfer(code, transferRequest);
+
+        return ResponseEntity.noContent().build();
     }
 
 }

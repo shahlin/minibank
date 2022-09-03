@@ -1,6 +1,7 @@
 package com.example.minibank.service;
 
 import com.example.minibank.controller.request.DepositRequest;
+import com.example.minibank.controller.request.TransferRequest;
 import com.example.minibank.exception.AccountTransactionException;
 import com.example.minibank.model.Customer;
 import com.example.minibank.exception.AccountExistsException;
@@ -19,6 +20,7 @@ public class AccountService {
 
     private final int MINIMUM_DEPOSIT_AMOUNT = 1;
     private final int MAXIMUM_DEPOSIT_AMOUNT = 100_000;
+    private final int MINIMUM_TRANSFER_AMOUNT = 1;
 
     private final AccountRepository accountRepository;
 
@@ -76,10 +78,29 @@ public class AccountService {
 
         validateDepositAmount(depositRequest);
 
-        double newBalance = account.get().getBalance() + depositRequest.getAmount();
-        account.get().setBalance(newBalance);
+        account.get().deposit(depositRequest.getAmount());
 
         return account.get();
+    }
+
+    @Transactional
+    public void transfer(String code, TransferRequest transferRequest) {
+        Optional<Account> senderAccount = accountRepository.findAccountByCode(code);
+
+        if (senderAccount.isEmpty()) {
+            throw new AccountNotFoundException("Sender account not found");
+        }
+
+        Optional<Account> receiverAccount = accountRepository.findAccountByCode(transferRequest.getReceiverAccountCode());
+
+        if (receiverAccount.isEmpty()) {
+            throw new AccountNotFoundException("Receiver account not found");
+        }
+
+        validateTransferAmount(senderAccount.get(), transferRequest.getAmount());
+
+        senderAccount.get().withdraw(transferRequest.getAmount());
+        receiverAccount.get().deposit(transferRequest.getAmount());
     }
 
     private void validateDepositAmount(DepositRequest depositRequest) {
@@ -89,6 +110,16 @@ public class AccountService {
 
         if (depositRequest.getAmount() > MAXIMUM_DEPOSIT_AMOUNT) {
             throw new AccountTransactionException("Deposit amount cannot be less than 1");
+        }
+    }
+
+    private void validateTransferAmount(Account account, double amount) {
+        if (amount > account.getBalance()) {
+            throw new AccountTransactionException("Insufficient funds to make the transfer");
+        }
+
+        if (amount < MINIMUM_TRANSFER_AMOUNT) {
+            throw new AccountTransactionException("Transfer amount cannot be less than 1");
         }
     }
 

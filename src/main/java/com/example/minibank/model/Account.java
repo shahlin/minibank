@@ -1,5 +1,6 @@
 package com.example.minibank.model;
 
+import com.example.minibank.exception.AccountTransactionException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.CreationTimestamp;
@@ -44,6 +45,22 @@ public class Account {
     @JsonManagedReference
     @OneToMany(mappedBy = "receiverAccount")
     private List<Transfer> receivedTransfers;
+
+    public void deposit(double amount) {
+        if (amount < 0) {
+            throw new AccountTransactionException("Cannot deposit negative amount");
+        }
+
+        balance += amount;
+    }
+
+    public void withdraw(double amount) {
+        if (amount > balance) {
+            throw new AccountTransactionException("Insufficient funds");
+        }
+
+        balance -= amount;
+    }
 
     public Integer getId() {
         return id;
