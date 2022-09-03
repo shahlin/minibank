@@ -1,10 +1,22 @@
 package com.example.minibank.customer;
 
-import org.hibernate.annotations.GenericGenerator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.tomcat.util.bcel.Const;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "customers")
@@ -14,22 +26,35 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
-    @Column(columnDefinition = "CHAR(32)")
+    @Column(columnDefinition = "CHAR(36)", nullable = false)
     private String code;
+
+    @NotBlank
+    @Size(min = 3, max = 255, message = "Name must contain 3-255 characters")
+    @Column(nullable = false)
     private String name;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email is invalid")
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(name = "date_of_birth")
+    @Column(name = "date_of_birth", nullable = false)
+    @NotNull(message = "Date of birth is required")
     private LocalDate dateOfBirth;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Transient
+    private Integer age;
+
+    @JsonIgnore
     public Integer getId() {
         return id;
     }
@@ -84,5 +109,23 @@ public class Customer {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Integer getAge() {
+        return Period.between(this.dateOfBirth, LocalDate.now()).getYears();
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", updatedAt=" + updatedAt +
+                ", createdAt=" + createdAt +
+                ", age=" + age +
+                '}';
     }
 }
