@@ -1,5 +1,6 @@
 package com.example.minibank.customer;
 
+import com.example.minibank.exceptions.CustomerNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,5 +18,10 @@ public class CustomerService {
 
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
+    }
+
+    public Customer getCustomer(String code) {
+        return customerRepository.findCustomerByCode(code)
+                .orElseThrow(CustomerNotFoundException::new);
     }
 }
