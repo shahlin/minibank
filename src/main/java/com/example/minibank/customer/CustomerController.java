@@ -1,5 +1,6 @@
 package com.example.minibank.customer;
 
+import com.example.minibank.account.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,5 +46,12 @@ public class CustomerController {
         Customer updatedCustomer = customerService.updateCustomer(code, customer);
 
         return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "{code}/accounts")
+    public ResponseEntity<?> openNewAccount(@PathVariable("code") String code) {
+        Account newAccount = customerService.openNewAccount(code);
+
+        return new ResponseEntity<>(newAccount, HttpStatus.OK);
     }
 }

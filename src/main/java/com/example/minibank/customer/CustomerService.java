@@ -1,5 +1,7 @@
 package com.example.minibank.customer;
 
+import com.example.minibank.account.Account;
+import com.example.minibank.account.AccountService;
 import com.example.minibank.exceptions.CustomerEmailTakenException;
 import com.example.minibank.exceptions.CustomerIneligibleException;
 import com.example.minibank.exceptions.CustomerNotFoundException;
@@ -16,12 +18,14 @@ import java.util.UUID;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final AccountService accountService;
 
     private static final int CUSTOMER_MIN_AGE_REQUIRED = 18;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, AccountService accountService) {
         this.customerRepository = customerRepository;
+        this.accountService = accountService;
     }
 
     public List<Customer> getAllCustomers() {
@@ -61,6 +65,16 @@ public class CustomerService {
         existingCustomer.setUpdatedAt(LocalDateTime.now());
 
         return existingCustomer;
+    }
+
+    public Account openNewAccount(String code) {
+        Optional<Customer> customerOptional = customerRepository.findCustomerByCode(code);
+
+        if (customerOptional.isEmpty()) {
+            throw new CustomerNotFoundException();
+        }
+
+        return accountService.openNewAccountForCustomer(customerOptional.get());
     }
 
     private String generateCustomerCode() {
