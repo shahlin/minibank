@@ -42,8 +42,8 @@ public class CustomerController {
 
     @PutMapping(path = "{code}")
     public ResponseEntity<Customer> updateCustomer(@PathVariable("code") String code, @Valid @RequestBody Customer customer) {
-        Customer newlyAddedCustomer = customerService.updateCustomer(code, customer);
+        Customer updatedCustomer = customerService.updateCustomer(code, customer);
 
-        return new ResponseEntity<>(newlyAddedCustomer, HttpStatus.OK);
+        return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
     }
 }
