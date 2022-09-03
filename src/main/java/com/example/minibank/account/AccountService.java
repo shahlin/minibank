@@ -2,6 +2,7 @@ package com.example.minibank.account;
 
 import com.example.minibank.customer.Customer;
 import com.example.minibank.exceptions.AccountExistsException;
+import com.example.minibank.exceptions.CustomerNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,11 @@ public class AccountService {
 
     public List<Account> getAllAccounts() {
         return accountRepository.findAll();
+    }
+
+    public Account getAccount(String code) {
+        return accountRepository.findAccountByCode(code)
+                .orElseThrow(CustomerNotFoundException::new);
     }
 
     @Transactional
