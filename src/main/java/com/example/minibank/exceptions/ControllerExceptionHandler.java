@@ -49,6 +49,16 @@ public class ControllerExceptionHandler {
         );
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorMessage globalRuntimeExceptionHandler(Exception ex, WebRequest request) {
+        return new ErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now(),
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage globalExceptionHandler(Exception ex, WebRequest request) {
