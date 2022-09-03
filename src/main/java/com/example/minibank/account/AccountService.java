@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,6 +18,10 @@ public class AccountService {
     @Autowired
     public AccountService(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
+    }
+
+    public List<Account> getAllAccounts() {
+        return accountRepository.findAll();
     }
 
     @Transactional
@@ -39,5 +44,4 @@ public class AccountService {
         UUID uuid = UUID.randomUUID();
         return uuid.toString();
     }
-
 }
