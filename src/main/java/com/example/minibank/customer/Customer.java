@@ -1,22 +1,14 @@
 package com.example.minibank.customer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.apache.tomcat.util.bcel.Const;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "customers")
