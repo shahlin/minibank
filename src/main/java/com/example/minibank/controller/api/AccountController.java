@@ -1,15 +1,13 @@
 package com.example.minibank.controller.api;
 
+import com.example.minibank.controller.request.DepositRequest;
 import com.example.minibank.service.AccountService;
 import com.example.minibank.model.Account;
 import com.example.minibank.model.Transfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -44,6 +42,13 @@ public class AccountController {
         Map<String, List<Transfer>> transfers = accountService.getAllTransfers(code);
 
         return new ResponseEntity<>(transfers, HttpStatus.OK);
+    }
+
+    @PutMapping(path = "{code}/deposit")
+    public ResponseEntity<Account> depositAmount(@PathVariable("code") String code, @RequestBody DepositRequest depositRequest) {
+        Account account = accountService.deposit(code, depositRequest);
+
+        return new ResponseEntity<>(account, HttpStatus.OK);
     }
 
 }

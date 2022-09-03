@@ -1,5 +1,7 @@
 package com.example.minibank.service;
 
+import com.example.minibank.controller.request.DepositRequest;
+import com.example.minibank.exception.AccountTransactionException;
 import com.example.minibank.model.Customer;
 import com.example.minibank.exception.AccountExistsException;
 import com.example.minibank.exception.AccountNotFoundException;
@@ -14,6 +16,9 @@ import java.util.*;
 
 @Service
 public class AccountService {
+
+    private final int MINIMUM_DEPOSIT_AMOUNT = 1;
+    private final int MAXIMUM_DEPOSIT_AMOUNT = 100_000;
 
     private final AccountRepository accountRepository;
 
@@ -59,6 +64,32 @@ public class AccountService {
         transfers.put("received", account.get().getReceivedTransfers());
 
         return transfers;
+    }
+
+    @Transactional
+    public Account deposit(String code, DepositRequest depositRequest) {
+        Optional<Account> account = accountRepository.findAccountByCode(code);
+
+        if (account.isEmpty()) {
+            throw new AccountNotFoundException();
+        }
+
+        validateDepositAmount(depositRequest);
+
+        double newBalance = account.get().getBalance() + depositRequest.getAmount();
+        account.get().setBalance(newBalance);
+
+        return account.get();
+    }
+
+    private void validateDepositAmount(DepositRequest depositRequest) {
+        if (depositRequest.getAmount() < MINIMUM_DEPOSIT_AMOUNT) {
+            throw new AccountTransactionException("Deposit amount cannot be less than 1");
+        }
+
+        if (depositRequest.getAmount() > MAXIMUM_DEPOSIT_AMOUNT) {
+            throw new AccountTransactionException("Deposit amount cannot be less than 1");
+        }
     }
 
     private String generateAccountCode() {
