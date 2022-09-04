@@ -1,6 +1,7 @@
 package com.example.minibank.service;
 
 import com.example.minibank.controller.request.DepositRequest;
+import com.example.minibank.controller.request.TransferRequest;
 import com.example.minibank.exception.AccountExistsException;
 import com.example.minibank.exception.AccountNotFoundException;
 import com.example.minibank.exception.AccountTransactionException;
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -119,6 +120,32 @@ class AccountServiceTest {
     }
 
     @Test
+    void canTransferValidAmountToAnotherAccount() {
+        String senderCode = UUID.randomUUID().toString();
+        Account senderAccount = new Account();
+        senderAccount.setCode(senderCode);
+        senderAccount.setBalance(1000);
+
+        String receiverCode = UUID.randomUUID().toString();
+        Account receiverAccount = new Account();
+        receiverAccount.setCode(receiverCode);
+        receiverAccount.setBalance(0);
+
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setReceiverAccountCode(receiverCode);
+        transferRequest.setAmount(500);
+
+        when(accountRepository.findAccountByCode(anyString()))
+                .thenReturn(Optional.of(senderAccount))
+                .thenReturn(Optional.of(receiverAccount));
+
+        accountService.transfer(senderCode, transferRequest);
+
+        assertThat(senderAccount.getBalance()).isEqualTo(500);
+        assertThat(receiverAccount.getBalance()).isEqualTo(500);
+    }
+
+    @Test
     void willThrowWhenAccountDoesNotExistOnGetSingleAccount() {
         when(accountRepository.findAccountByCode(anyString())).thenReturn(Optional.empty());
 
@@ -172,9 +199,6 @@ class AccountServiceTest {
 
         String code = anyString();
         Account account = new Account();
-        account.setId(1);
-        account.setCode(code);
-        account.setBalance(0);
 
         when(accountRepository.findAccountByCode(code)).thenReturn(Optional.of(account));
 
@@ -190,12 +214,99 @@ class AccountServiceTest {
 
         String code = anyString();
         Account account = new Account();
-        account.setId(1);
-        account.setCode(code);
-        account.setBalance(0);
 
         when(accountRepository.findAccountByCode(code)).thenReturn(Optional.of(account));
 
         assertThrows(AccountTransactionException.class, () -> accountService.deposit(code, depositRequest));
+    }
+
+    @Test
+    void willThrowWhenSenderAccountDoesNotExistOnTransfer() {
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setAmount(1000);
+
+        when(accountRepository.findAccountByCode(anyString())).thenReturn(Optional.empty());
+
+        AccountNotFoundException thrown = assertThrows(
+                AccountNotFoundException.class,
+                () -> accountService.transfer(anyString(), transferRequest)
+        );
+
+        assertEquals("Sender account not found", thrown.getMessage());
+    }
+
+    @Test
+    void willThrowWhenReceiverAccountDoesNotExistOnTransfer() {
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setAmount(1000);
+
+        Account account = new Account();
+
+        when(accountRepository.findAccountByCode(anyString()))
+                .thenReturn(Optional.of(account))
+                .thenReturn(Optional.empty());
+
+        AccountNotFoundException thrown = assertThrows(
+                AccountNotFoundException.class,
+                () -> accountService.transfer(anyString(), transferRequest)
+        );
+
+        assertEquals("Receiver account not found", thrown.getMessage());
+    }
+
+    @Test
+    void willThrowWhenSenderDoesNotHaveEnoughFundsOnTransfer() {
+        String senderCode = UUID.randomUUID().toString();
+        Account senderAccount = new Account();
+        senderAccount.setCode(senderCode);
+        senderAccount.setBalance(1000);
+
+        String receiverCode = UUID.randomUUID().toString();
+        Account receiverAccount = new Account();
+        receiverAccount.setCode(receiverCode);
+        receiverAccount.setBalance(0);
+
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setReceiverAccountCode(receiverCode);
+        transferRequest.setAmount(2000);
+
+        when(accountRepository.findAccountByCode(anyString()))
+                .thenReturn(Optional.of(senderAccount))
+                .thenReturn(Optional.of(receiverAccount));
+
+        AccountTransactionException thrown = assertThrows(
+                AccountTransactionException.class,
+                () -> accountService.transfer(senderCode, transferRequest)
+        );
+
+        assertEquals("Insufficient funds to make the transfer", thrown.getMessage());
+    }
+
+    @Test
+    void willThrowWhenTransferAmountIsLessThatMinimumAllowedOnTransfer() {
+        String senderCode = UUID.randomUUID().toString();
+        Account senderAccount = new Account();
+        senderAccount.setCode(senderCode);
+        senderAccount.setBalance(1000);
+
+        String receiverCode = UUID.randomUUID().toString();
+        Account receiverAccount = new Account();
+        receiverAccount.setCode(receiverCode);
+        receiverAccount.setBalance(0);
+
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setReceiverAccountCode(receiverCode);
+        transferRequest.setAmount(-10);
+
+        when(accountRepository.findAccountByCode(anyString()))
+                .thenReturn(Optional.of(senderAccount))
+                .thenReturn(Optional.of(receiverAccount));
+
+        AccountTransactionException thrown = assertThrows(
+                AccountTransactionException.class,
+                () -> accountService.transfer(senderCode, transferRequest)
+        );
+
+        assertEquals("Transfer amount cannot be less than 1", thrown.getMessage());
     }
 }
