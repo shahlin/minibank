@@ -47,7 +47,7 @@ public class Account {
     @OneToMany(mappedBy = "receiverAccount")
     private List<Transfer> receivedTransfers;
 
-    public void deposit(double amount) {
+    public synchronized void deposit(double amount) {
         if (amount < 0) {
             throw new AccountTransactionException("Cannot deposit negative amount");
         }
@@ -55,7 +55,7 @@ public class Account {
         balance += amount;
     }
 
-    public void withdraw(double amount) {
+    public synchronized void withdraw(double amount) {
         if (amount > balance) {
             throw new AccountTransactionException("Insufficient funds");
         }

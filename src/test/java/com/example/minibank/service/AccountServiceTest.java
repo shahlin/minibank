@@ -18,6 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -143,6 +146,128 @@ class AccountServiceTest {
 
         assertThat(senderAccount.getBalance()).isEqualTo(500);
         assertThat(receiverAccount.getBalance()).isEqualTo(500);
+    }
+
+    @Test
+    void canHandleMultipleDepositsConcurrently() throws InterruptedException {
+        double amountToDeposit = 1000;
+
+        DepositRequest depositRequest = new DepositRequest();
+        depositRequest.setAmount(amountToDeposit);
+
+        String code = anyString();
+        Account account = new Account();
+        account.setId(1);
+        account.setCode(code);
+        account.setBalance(0);
+
+        when(accountRepository.findAccountByCode(code)).thenReturn(Optional.of(account));
+
+        int numberOfThreads = 50;
+        ExecutorService service = Executors.newFixedThreadPool(100);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        for (int i = 0; i < numberOfThreads; i++) {
+            service.execute(() -> {
+                accountService.deposit(code, depositRequest);
+                latch.countDown();
+            });
+        }
+
+        latch.await();
+        assertThat(account.getBalance()).isEqualTo(amountToDeposit * numberOfThreads);
+    }
+
+    @Test
+    void canHandleSingleAccountTransfersConcurrently() throws InterruptedException {
+        String senderCode = UUID.randomUUID().toString();
+        Account senderAccount = new Account();
+        senderAccount.setCode(senderCode);
+        senderAccount.setBalance(1000);
+
+        String receiverCode = UUID.randomUUID().toString();
+        Account receiverAccount = new Account();
+        receiverAccount.setCode(receiverCode);
+        receiverAccount.setBalance(0);
+
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setReceiverAccountCode(receiverCode);
+        transferRequest.setAmount(2);
+
+        when(accountRepository.findAccountByCode(senderCode)).thenReturn(Optional.of(senderAccount));
+        when(accountRepository.findAccountByCode(receiverCode)).thenReturn(Optional.of(receiverAccount));
+
+        int numberOfThreads = 100;
+        ExecutorService service = Executors.newFixedThreadPool(100);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        for (int i = 0; i < numberOfThreads; i++) {
+            service.execute(() -> {
+                accountService.transfer(senderCode, transferRequest);
+                latch.countDown();
+            });
+        }
+
+        latch.await();
+
+        assertThat(senderAccount.getBalance())
+                .isEqualTo(1000 - (numberOfThreads * transferRequest.getAmount()));
+
+        assertThat(receiverAccount.getBalance())
+                .isEqualTo(0 + (numberOfThreads * transferRequest.getAmount()));
+    }
+
+    @Test
+    void canHandleDoubleAccountTransfersConcurrently() throws InterruptedException {
+        String senderCode1 = UUID.randomUUID().toString();
+        Account senderAccount1 = new Account();
+        senderAccount1.setCode(senderCode1);
+        senderAccount1.setBalance(1000);
+
+        String senderCode2 = UUID.randomUUID().toString();
+        Account senderAccount2 = new Account();
+        senderAccount2.setCode(senderCode2);
+        senderAccount2.setBalance(1000);
+
+        String receiverCode = UUID.randomUUID().toString();
+        Account receiverAccount = new Account();
+        receiverAccount.setCode(receiverCode);
+        receiverAccount.setBalance(0);
+
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setReceiverAccountCode(receiverCode);
+        transferRequest.setAmount(2);
+
+        when(accountRepository.findAccountByCode(senderCode1)).thenReturn(Optional.of(senderAccount1));
+        when(accountRepository.findAccountByCode(senderCode2)).thenReturn(Optional.of(senderAccount2));
+        when(accountRepository.findAccountByCode(receiverCode)).thenReturn(Optional.of(receiverAccount));
+
+        int numberOfThreads = 100;
+        ExecutorService service = Executors.newFixedThreadPool(200);
+        CountDownLatch latch1 = new CountDownLatch(numberOfThreads);
+        CountDownLatch latch2 = new CountDownLatch(numberOfThreads);
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            service.execute(() -> {
+                accountService.transfer(senderCode1, transferRequest);
+                latch1.countDown();
+            });
+
+            service.execute(() -> {
+                accountService.transfer(senderCode2, transferRequest);
+                latch2.countDown();
+            });
+        }
+
+        latch1.await();
+        latch2.await();
+
+        assertThat(senderAccount1.getBalance())
+                .isEqualTo(1000 - (numberOfThreads * transferRequest.getAmount()));
+
+        assertThat(senderAccount1.getBalance())
+                .isEqualTo(1000 - (numberOfThreads * transferRequest.getAmount()));
+
+        assertThat(receiverAccount.getBalance())
+                .isEqualTo(2 * (numberOfThreads * transferRequest.getAmount()));
     }
 
     @Test
