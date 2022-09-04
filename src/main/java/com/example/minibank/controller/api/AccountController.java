@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "api/v1/accounts")
+@RequestMapping(path = "/accounts")
 @Tag(name = "Account API", description = "Account related APIs. Read, add, update, deposit and transfer")
 public class AccountController {
 

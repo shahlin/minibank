@@ -15,7 +15,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1/customers")
+@RequestMapping(path = "/customers")
 @Tag(name = "Customer API", description = "Customer related APIs. Read, add, update and open new account for customers")
 public class CustomerController {
 
