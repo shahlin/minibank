@@ -3,6 +3,9 @@ package com.example.minibank.controller.api;
 import com.example.minibank.service.CustomerService;
 import com.example.minibank.model.Account;
 import com.example.minibank.model.Customer;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.RouterOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/customers")
+@Tag(name = "Customer API", description = "Customer related APIs. Read, add, update and open new account for customers")
 public class CustomerController {
 
     private final CustomerService customerService;

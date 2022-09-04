@@ -5,6 +5,7 @@ import com.example.minibank.controller.request.TransferRequest;
 import com.example.minibank.service.AccountService;
 import com.example.minibank.model.Account;
 import com.example.minibank.model.Transfer;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(path = "api/v1/accounts")
+@Tag(name = "Account API", description = "Account related APIs. Read, add, update, deposit and transfer")
 public class AccountController {
 
     private final AccountService accountService;
