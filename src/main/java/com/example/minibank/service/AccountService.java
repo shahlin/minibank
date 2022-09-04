@@ -38,7 +38,7 @@ public class AccountService {
                 .orElseThrow(AccountNotFoundException::new);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Account openNewAccountForCustomer(Customer customer) {
         Optional<Account> accountOptional = accountRepository.findAccountByCustomerId(customer.getId());
 
@@ -68,7 +68,7 @@ public class AccountService {
         return transfers;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Account deposit(String code, DepositRequest depositRequest) {
         Optional<Account> account = accountRepository.findAccountByCode(code);
 
@@ -83,7 +83,7 @@ public class AccountService {
         return account.get();
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void transfer(String code, TransferRequest transferRequest) {
         Optional<Account> senderAccount = accountRepository.findAccountByCode(code);
 

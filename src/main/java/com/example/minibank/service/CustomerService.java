@@ -37,7 +37,7 @@ public class CustomerService {
                 .orElseThrow(CustomerNotFoundException::new);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Customer createCustomer(Customer customer) {
         CustomerValidator.validateAge(customer);
         checkCustomerExistsWithEmail(customer, "");
