@@ -22,7 +22,7 @@ public class AccountTransactionValidator {
         }
 
         if (amount < AccountService.MINIMUM_TRANSFER_AMOUNT) {
-            throw new AccountTransactionException("Transfer amount cannot be less than 1");
+            throw new AccountTransactionException("Transfer amount cannot be less than " + AccountService.MINIMUM_TRANSFER_AMOUNT);
         }
     }
 
