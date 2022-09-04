@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -87,7 +88,7 @@ public class Account {
     }
 
     public List<Transfer> getSentTransfers() {
-        return sentTransfers;
+        return (sentTransfers != null) ? sentTransfers : Collections.emptyList();
     }
 
     public void setSentTransfers(List<Transfer> sentTransfers) {
@@ -95,7 +96,7 @@ public class Account {
     }
 
     public List<Transfer> getReceivedTransfers() {
-        return receivedTransfers;
+        return (receivedTransfers != null) ? receivedTransfers : Collections.emptyList();
     }
 
     public void setReceivedTransfers(List<Transfer> receivedTransfers) {
