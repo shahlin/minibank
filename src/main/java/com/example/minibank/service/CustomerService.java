@@ -47,7 +47,7 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Customer updateCustomer(String code, Customer customer) {
         Optional<Customer> customerOptional = customerRepository.findCustomerByCode(code);
 
