@@ -10,9 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -86,7 +88,48 @@ class CustomerServiceTest {
     }
 
     @Test
-    void willThrowCustomerNotFoundWhenCustomerDoesNotExist() {
+    void canUpdateExistingCustomerWithNameChanged() {
+        Customer customer = new Customer();
+        customer.setCode(UUID.randomUUID().toString());
+        customer.setEmail("alex@gmail.com");
+        customer.setName("Alex");
+        customer.setDateOfBirth(LocalDate.of(minimumRequiredDateOfBirthYear, 1, 1));
+    }
+
+    @Test
+    void canUpdateExistingCustomerWithNewName() {
+        String name = "John";
+        String code = UUID.randomUUID().toString();
+
+        Customer customer = new Customer();
+        customer.setEmail("alex@gmail.com");
+        customer.setName(name);
+        customer.setDateOfBirth(LocalDate.of(minimumRequiredDateOfBirthYear, 1, 1));
+
+        when(customerRepository.findCustomerByCode(code)).thenReturn(Optional.of(customer));
+        Customer updatedCustomer = customerService.updateCustomer(code, customer);
+
+        assertThat(updatedCustomer.getName()).isEqualTo(name);
+    }
+
+    @Test
+    void canOpenNewAccountForExistingCustomer() {
+        String code = UUID.randomUUID().toString();
+
+        Customer customer = new Customer();
+        customer.setCode(code);
+        customer.setEmail("alex@gmail.com");
+        customer.setName("Alex");
+        customer.setDateOfBirth(LocalDate.of(minimumRequiredDateOfBirthYear, 1, 1));
+
+        when(customerRepository.findCustomerByCode(code)).thenReturn(Optional.of(customer));
+        customerService.openNewAccount(code);
+
+        verify(accountService).openNewAccountForCustomer(customer);
+    }
+
+    @Test
+    void willThrowWhenCustomerDoesNotExistOnGetSingleCustomer() {
         String code = UUID.randomUUID().toString();
 
         Customer customer = new Customer();
@@ -106,7 +149,7 @@ class CustomerServiceTest {
         customer.setName("Alex");
         customer.setDateOfBirth(LocalDate.of(minimumRequiredDateOfBirthYear, 1, 1));
 
-        when(customerRepository.findCustomerByEmailWithExcludeList(customer.getEmail(), new ArrayList<>()))
+        when(customerRepository.findCustomerByEmailWithExcludeList(customer.getEmail(), List.of("")))
                 .thenReturn(Optional.of(customer));
 
         assertThrows(RuntimeException.class, () -> customerService.createCustomer(customer));
@@ -124,6 +167,46 @@ class CustomerServiceTest {
         customer.setDateOfBirth(LocalDate.of(minimumRequiredDateOfBirthYear + 1, 1, 1));
 
         assertThrows(CustomerIneligibleException.class, () -> customerService.createCustomer(customer));
+    }
+
+    @Test
+    void willThrowWhenCustomerDoesNotExistOnUpdate() {
+        String code = UUID.randomUUID().toString();
+        Customer customer = new Customer();
+        customer.setCode(code);
+        customer.setEmail("alex@gmail.com");
+        customer.setName("Alex");
+        customer.setDateOfBirth(LocalDate.of(minimumRequiredDateOfBirthYear, 1, 1));
+
+        when(customerRepository.findCustomerByCode(code)).thenReturn(Optional.empty());
+
+        assertThrows(CustomerNotFoundException.class, () -> customerService.updateCustomer(code, customer));
+    }
+
+    @Test
+    void willThrowWhenCustomerEmailIsTakenOnUpdate() {
+        String code = UUID.randomUUID().toString();
+        Customer customer = new Customer();
+        customer.setCode(code);
+        customer.setEmail("alex@gmail.com");
+        customer.setName("Alex");
+        customer.setDateOfBirth(LocalDate.of(minimumRequiredDateOfBirthYear, 1, 1));
+
+        when(customerRepository.findCustomerByCode(code)).thenReturn(Optional.of(customer));
+
+        when(customerRepository.findCustomerByEmailWithExcludeList(customer.getEmail(), List.of("")))
+                .thenReturn(Optional.of(customer));
+
+        assertThrows(RuntimeException.class, () -> customerService.updateCustomer(code, customer));
+    }
+
+    @Test
+    void willThrowWhenCustomerDoesNotExistOnOpenAccount() {
+        String code = UUID.randomUUID().toString();
+
+        when(customerRepository.findCustomerByCode(code)).thenReturn(Optional.empty());
+
+        assertThrows(CustomerNotFoundException.class, () -> customerService.openNewAccount(code));
     }
 
 }
