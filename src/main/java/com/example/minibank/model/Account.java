@@ -34,7 +34,6 @@ public class Account {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private Customer customer;

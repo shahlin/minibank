@@ -9,6 +9,7 @@ import com.example.minibank.model.Account;
 import com.example.minibank.model.Customer;
 import com.example.minibank.model.Transfer;
 import com.example.minibank.repository.AccountRepository;
+import com.example.minibank.repository.TransferRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,11 +33,13 @@ class AccountServiceTest {
 
     @Mock
     private AccountRepository accountRepository;
+    @Mock
+    private TransferRepository transferRepository;
     private AccountService accountService;
 
     @BeforeEach
     void setUp() {
-        accountService = new AccountService(accountRepository);
+        accountService = new AccountService(accountRepository, transferRepository);
     }
 
     @Test
@@ -143,6 +146,9 @@ class AccountServiceTest {
                 .thenReturn(Optional.of(receiverAccount));
 
         accountService.transfer(senderCode, transferRequest);
+
+        ArgumentCaptor<Transfer> transferArgumentCaptor = ArgumentCaptor.forClass(Transfer.class);
+        verify(transferRepository).save(transferArgumentCaptor.capture());
 
         assertThat(senderAccount.getBalance()).isEqualTo(500);
         assertThat(receiverAccount.getBalance()).isEqualTo(500);

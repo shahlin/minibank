@@ -1,6 +1,5 @@
 package com.example.minibank.model;
 
-import com.example.minibank.model.Account;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,7 +33,7 @@ public class Transfer {
     @Column(name = "amount", nullable = false)
     private double amount;
 
-    @Column(name = "remarks", nullable = false)
+    @Column(name = "remarks")
     @Size(max = 255)
     private String remarks;
 

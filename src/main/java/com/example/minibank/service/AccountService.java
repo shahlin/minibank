@@ -8,6 +8,7 @@ import com.example.minibank.exception.AccountNotFoundException;
 import com.example.minibank.model.Account;
 import com.example.minibank.repository.AccountRepository;
 import com.example.minibank.model.Transfer;
+import com.example.minibank.repository.TransferRepository;
 import com.example.minibank.validator.AccountTransactionValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,10 +24,12 @@ public class AccountService {
     public static final int MINIMUM_TRANSFER_AMOUNT = 1;
 
     private final AccountRepository accountRepository;
+    private final TransferRepository transferRepository;
 
     @Autowired
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, TransferRepository transferRepository) {
         this.accountRepository = accountRepository;
+        this.transferRepository = transferRepository;
     }
 
     public List<Account> getAllAccounts() {
@@ -98,6 +101,14 @@ public class AccountService {
         }
 
         AccountTransactionValidator.validateTransferAmount(senderAccount.get(), transferRequest.getAmount());
+
+        Transfer transfer = new Transfer();
+        transfer.setAmount(transferRequest.getAmount());
+        transfer.setCode(UUID.randomUUID().toString());
+        transfer.setRemarks(transferRequest.getRemarks());
+        transfer.setSenderAccount(senderAccount.get());
+        transfer.setReceiverAccount(receiverAccount.get());
+        transferRepository.save(transfer);
 
         senderAccount.get().withdraw(transferRequest.getAmount());
         receiverAccount.get().deposit(transferRequest.getAmount());
