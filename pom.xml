@@ -10,9 +10,9 @@
     </parent>
     <groupId>com.example</groupId>
     <artifactId>minibank</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>minibank</name>
-    <description>minibank</description>
+    <description>Create customers, open their accounts and make deposits and transfers using minibank REST APIs</description>
     <properties>
         <java.version>17</java.version>
     </properties>
