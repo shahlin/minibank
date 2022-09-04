@@ -35,3 +35,9 @@ $ docker run -p 8080:8080 minibank-server:latest
 ```
 
 6. That should get the project up and running! Swagger UI cannot be viewed using: http://localhost:8080/api/v1/swagger-ui/index.html
+
+# Application Flow / Usage
+1. Create a new customer
+2. Open a new account for the customer
+3. Deposit money into account
+4. Transfer money to another account
